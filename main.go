@@ -692,6 +692,7 @@ func handleDiscordMessage(m *discordgo.Message) {
 										if len(findDownloadedImageByUrl(iAttachment.URL)) == 0 {
 											i++
 											startDownload(iAttachment.URL, iAttachment.Filename, folder, message.ChannelID, message.Author.ID, fileTime)
+											fmt.Printf(", \"%s\"]\n", message.Author.Username)
 										}
 									}
 									foundUrls := xurls.Strict().FindAllString(message.Content, -1)
@@ -701,6 +702,7 @@ func handleDiscordMessage(m *discordgo.Message) {
 											if len(findDownloadedImageByUrl(link)) == 0 {
 												i++
 												startDownload(link, filename, folder, message.ChannelID, message.Author.ID, fileTime)
+												fmt.Printf(", \"%s\"]\n", message.Author.Username)
 											}
 										}
 									}
@@ -1497,7 +1499,7 @@ func downloadFromUrl(dUrl string, filename string, path string, channelId string
 			}
 			i = i + 1
 		}
-		fmt.Printf("[%s] Saving possible duplicate (filenames match): %s to %s\n", time.Now().Format(time.Stamp), tmpPath, completePath)
+		//		fmt.Printf("[%s] Saving possible duplicate (filenames match): %s to %s\n", time.Now().Format(time.Stamp), tmpPath, completePath)
 	}
 
 	bodyOfResp, err := ioutil.ReadAll(response.Body)
@@ -1523,19 +1525,18 @@ func downloadFromUrl(dUrl string, filename string, path string, channelId string
 		fmt.Println("Error while changing date", dUrl, "-", err)
 	}
 
-	sourceChannelName := channelId
-	sourceGuildName := "N/A"
-	sourceChannel, _ := dg.State.Channel(channelId)
-	if sourceChannel != nil && sourceChannel.Name != "" {
-		sourceChannelName = sourceChannel.Name
-		sourceGuild, _ := dg.State.Guild(sourceChannel.GuildID)
-		if sourceGuild != nil && sourceGuild.Name != "" {
-			sourceGuildName = sourceGuild.Name
-		}
-	}
+	//	sourceChannelName := channelId
+	//	sourceGuildName := "N/A"
+	//	sourceChannel, _ := dg.State.Channel(channelId)
+	//	if sourceChannel != nil && sourceChannel.Name != "" {
+	//		sourceChannelName = sourceChannel.Name
+	//		sourceGuild, _ := dg.State.Guild(sourceChannel.GuildID)
+	//		if sourceGuild != nil && sourceGuild.Name != "" {
+	//			sourceGuildName = sourceGuild.Name
+	//		}
+	//	}
 
-	fmt.Printf("[%s] Saved URL %s to %s from #%s/%s\n",
-		time.Now().Format(time.Stamp), dUrl, completePath, sourceChannelName, sourceGuildName)
+	fmt.Printf("\"%s\": [\"%s\"", completePath, dUrl)
 	err = insertDownloadedImage(&DownloadedImage{Url: dUrl, Time: time.Now(), Destination: completePath, ChannelId: channelId, UserId: userId})
 	if err != nil {
 		fmt.Println("Error while writing to database", err)
